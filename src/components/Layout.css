@@ -112,6 +112,27 @@
   width: calc(100vw - 240px);
 }
 
+/* Admin link styling */
+.admin-link {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  margin-top: 2rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  color: #fbbf24 !important;
+  font-weight: 500;
+}
+
+.admin-link:hover {
+  background: rgba(251, 191, 36, 0.1);
+  color: #fde047 !important;
+}
+
+.admin-link.active {
+  background: rgba(251, 191, 36, 0.2);
+  color: #fde047 !important;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .layout-body {

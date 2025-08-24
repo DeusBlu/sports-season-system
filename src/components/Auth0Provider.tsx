@@ -8,11 +8,13 @@ interface Auth0ProviderProps {
 export function Auth0Provider({ children }: Auth0ProviderProps) {
   const domain = import.meta.env.VITE_AUTH0_DOMAIN
   const clientId = import.meta.env.VITE_AUTH0_CLIENT_ID
+  const audience = import.meta.env.VITE_AUTH0_AUDIENCE
   const redirectUri = `${window.location.origin}/callback`
 
   console.log('Auth0 Config:', { 
     domain, 
     clientId, 
+    audience,
     redirectUri,
     currentUrl: window.location.href 
   })
@@ -26,7 +28,9 @@ export function Auth0Provider({ children }: Auth0ProviderProps) {
       domain={domain}
       clientId={clientId}
       authorizationParams={{
-        redirect_uri: redirectUri
+        redirect_uri: redirectUri,
+        audience: audience,
+        scope: 'openid profile email read:current_user'
       }}
       cacheLocation="localstorage"
       useRefreshTokens={true}

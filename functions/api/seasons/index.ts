@@ -95,15 +95,30 @@ export async function onRequestPost(context: CloudflareContext) {
       season.startDate || null,
       season.endDate || null,
       season.ownerId || 'user-1',
-      season.status || 'draft',
+      season.status || 'preseason',
       createdAt
     ).run();
+
+    // Automatically add the owner as a member
+    if (season.ownerId) {
+      try {
+        await db.prepare(`
+          INSERT INTO Season_Members (season_id, user_id, joined_at, status)
+          VALUES (?, ?, ?, 'active')
+        `).bind(id, season.ownerId, createdAt).run();
+        
+        console.log(`Owner ${season.ownerId} automatically added as member to season ${id}`);
+      } catch (memberError) {
+        console.warn('Failed to add owner as member:', memberError);
+        // Don't fail the season creation if member addition fails
+      }
+    }
 
     const createdSeason = {
       id,
       ...season,
       ownerId: season.ownerId || 'user-1',
-      status: season.status || 'draft',
+      status: season.status || 'preseason',
       createdAt
     };
 

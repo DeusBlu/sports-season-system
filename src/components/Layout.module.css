@@ -1,0 +1,160 @@
+/* Layout CSS Module */
+.layout {
+  min-height: 100vh;
+  width: 100vw;
+  display: flex;
+  flex-direction: column;
+  background: #f8fafc;
+}
+
+.topNav {
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(10px);
+  border-bottom: 3px solid #ff6600;
+  padding: 1rem 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: white;
+  width: 100%;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+  position: relative;
+  z-index: 10;
+}
+
+.navBrand h1 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.navCenter {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+.navAuth {
+  flex-shrink: 0;
+}
+
+.topNavLinks {
+  display: flex;
+  gap: 2rem;
+}
+
+.topNavLinks a {
+  color: white;
+  text-decoration: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  transition: all 0.2s;
+  font-weight: 600;
+  border: 2px solid transparent;
+}
+
+.topNavLinks a:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.topNavLinks a.active {
+  background: #ff6600;
+  border-color: #ff4400;
+}
+
+.mainContainer {
+  display: flex;
+  flex: 1;
+  background: #f8fafc;
+}
+
+.sidebar {
+  width: 250px;
+  background: rgba(0, 0, 0, 0.9);
+  backdrop-filter: blur(10px);
+  color: white;
+  padding: 2rem 0;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);
+  flex-shrink: 0;
+}
+
+.sidebarNav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0 1rem;
+}
+
+.sidebarNav a {
+  color: rgba(255, 255, 255, 0.8);
+  text-decoration: none;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  transition: all 0.2s;
+  font-weight: 500;
+  border-left: 3px solid transparent;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.sidebarNav a:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  border-left-color: rgba(255, 255, 255, 0.3);
+}
+
+.sidebarNav a.active {
+  background: #ff6600;
+  color: white;
+  border-left-color: #ff4400;
+}
+
+.adminLink {
+  border-left-color: #10b981 !important;
+  background: rgba(16, 185, 129, 0.1) !important;
+}
+
+.adminLink:hover {
+  background: rgba(16, 185, 129, 0.2) !important;
+}
+
+.mainContent {
+  flex: 1;
+  background: white;
+  min-height: calc(100vh - 90px);
+  overflow-y: auto;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .topNav {
+    padding: 1rem;
+  }
+  
+  .navCenter {
+    display: none;
+  }
+  
+  .mainContainer {
+    flex-direction: column;
+  }
+  
+  .sidebar {
+    width: 100%;
+    padding: 1rem 0;
+  }
+  
+  .sidebarNav {
+    flex-direction: row;
+    overflow-x: auto;
+    padding: 0 1rem;
+  }
+  
+  .sidebarNav a {
+    white-space: nowrap;
+    min-width: max-content;
+  }
+}

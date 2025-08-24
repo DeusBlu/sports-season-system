@@ -1,7 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useAuth0 } from '@auth0/auth0-react';
 import './ManageSeasons.css';
 import { dataService } from '../services/dataService';
 import type { Season } from '../services/dataService';
+import { SEASON_STATUS } from '../constants/seasonStatus';
 
 interface SeasonSettings {
   seasonName: string;
@@ -14,6 +16,7 @@ interface SeasonSettings {
 }
 
 const ManageSeasons: React.FC = () => {
+  const { user, isAuthenticated } = useAuth0();
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [seasons, setSeasons] = useState<Season[]>([]);
   const [loading, setLoading] = useState(true);
@@ -27,15 +30,12 @@ const ManageSeasons: React.FC = () => {
     daySpanPerGame: 3
   });
 
-  // Load seasons on component mount
-  useEffect(() => {
-    loadSeasons();
-  }, []);
+  const loadSeasons = useCallback(async () => {
+    if (!user?.sub) return;
 
-  const loadSeasons = async () => {
     try {
       setLoading(true);
-      const seasonData = await dataService.getSeasons();
+      const seasonData = await dataService.getUserOwnedSeasons(user.sub);
       setSeasons(seasonData);
       console.log('Loaded seasons:', seasonData);
     } catch (error) {
@@ -43,7 +43,16 @@ const ManageSeasons: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user?.sub]);
+
+  // Load user's owned seasons on component mount
+  useEffect(() => {
+    if (isAuthenticated && user?.sub) {
+      loadSeasons();
+    } else {
+      setLoading(false);
+    }
+  }, [isAuthenticated, user?.sub, loadSeasons]);
 
   // Comprehensive hockey games list - newest first
   const hockeyGames = [
@@ -146,6 +155,11 @@ const ManageSeasons: React.FC = () => {
   };
 
   const handleCreateSeason = async () => {
+    if (!user?.sub) {
+      console.error('User not authenticated');
+      return;
+    }
+
     try {
       const seasonData = {
         name: settings.seasonName,
@@ -156,12 +170,11 @@ const ManageSeasons: React.FC = () => {
         canReschedule: settings.canReschedule,
         daySpanPerGame: settings.daySpanPerGame,
         createdAt: new Date().toISOString(),
-        ownerId: 'user-1', // TODO: Get from auth context
-        status: 'draft' as const
+        status: SEASON_STATUS.PRESEASON
       };
 
       console.log('Creating season with settings:', seasonData);
-      const createdSeason = await dataService.createSeason(seasonData);
+      const createdSeason = await dataService.createSeasonWithOwnership(seasonData, user.sub);
       console.log('Season created:', createdSeason);
       
       // Refresh the seasons list

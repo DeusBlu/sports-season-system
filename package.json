@@ -15,7 +15,10 @@
     "test": "vitest",
     "test:ui": "vitest --ui",
     "test:run": "vitest run",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "migrate": "npm run migrate:local",
+    "migrate:local": "npx wrangler d1 execute sports_seasons --local --file=migrations/0001_create_seasons.sql && npx wrangler d1 execute sports_seasons --local --file=migrations/0002_create_games.sql && npx wrangler d1 execute sports_seasons --local --file=migrations/0003-add-user-seasons.sql && npx wrangler d1 execute sports_seasons --local --file=migrations/0004-add-season-members.sql",
+    "migrate:remote": "npx wrangler d1 execute sports_seasons --remote --file=migrations/0001_create_seasons.sql && npx wrangler d1 execute sports_seasons --remote --file=migrations/0002_create_games.sql && npx wrangler d1 execute sports_seasons --remote --file=migrations/0003-add-user-seasons.sql && npx wrangler d1 execute sports_seasons --remote --file=migrations/0004-add-season-members.sql"
   },
   "dependencies": {
     "@auth0/auth0-react": "^2.4.0",
@@ -32,6 +35,7 @@
     "@testing-library/jest-dom": "^6.8.0",
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^14.6.1",
+    "@types/css-modules": "^1.0.5",
     "@types/node": "^24.3.0",
     "@types/react": "^19.1.10",
     "@types/react-big-calendar": "^1.16.2",

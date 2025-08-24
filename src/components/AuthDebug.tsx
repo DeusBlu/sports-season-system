@@ -26,6 +26,7 @@ export function AuthDebug() {
         error: auth0.error?.message,
         user: auth0.user ? {
           name: auth0.user.name,
+          nickname: auth0.user.nickname,
           email: auth0.user.email,
           sub: auth0.user.sub
         } : null

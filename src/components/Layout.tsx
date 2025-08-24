@@ -1,7 +1,9 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { AuthButton } from './AuthButton';
-import './Layout.css';
+import { usePermissions, PERMISSIONS } from '../hooks/usePermissions';
+import { Shield } from 'lucide-react';
+import styles from './Layout.module.css';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -9,16 +11,18 @@ interface LayoutProps {
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const location = useLocation();
+  const { hasPermission } = usePermissions();
+  const canViewAllSeasons = hasPermission(PERMISSIONS.VIEW_ALL_SEASONS);
 
   return (
-    <div className="layout">
+    <div className={styles.layout}>
       {/* Top Navigation */}
-      <header className="top-nav">
-        <div className="nav-brand">
+      <header className={styles.topNav}>
+        <div className={styles.navBrand}>
           <h1>Sports Season System</h1>
         </div>
-        <div className="nav-center">
-          <nav className="top-nav-links">
+        <div className={styles.navCenter}>
+          <nav className={styles.topNavLinks}>
             <Link 
               to="/hockey" 
               className={location.pathname.startsWith('/hockey') ? 'active' : ''}
@@ -27,20 +31,20 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             </Link>
           </nav>
         </div>
-        <div className="nav-auth">
+        <div className={styles.navAuth}>
           <AuthButton />
         </div>
       </header>
 
-      <div className="layout-body">
+      <div className={styles.mainContainer}>
         {/* Left Sidebar */}
-        <aside className="sidebar">
-          <nav className="sidebar-nav">
+        <aside className={styles.sidebar}>
+          <nav className={styles.sidebarNav}>
             <Link 
-              to="/hockey/schedule" 
-              className={location.pathname.includes('/schedule') ? 'active' : ''}
+              to="/hockey/seasons" 
+              className={location.pathname.includes('/seasons') ? 'active' : ''}
             >
-              Schedule
+              Seasons
             </Link>
             <Link 
               to="/hockey/manage-seasons" 
@@ -48,11 +52,20 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             >
               Manage Seasons
             </Link>
+            {canViewAllSeasons && (
+              <Link 
+                to="/admin" 
+                className={`${location.pathname.includes('/admin') ? 'active' : ''} ${styles.adminLink}`}
+              >
+                <Shield style={{ width: '1rem', height: '1rem', marginRight: '0.5rem' }} />
+                System Admin
+              </Link>
+            )}
           </nav>
         </aside>
 
         {/* Main Content */}
-        <main className="main-content">
+        <main className={styles.mainContent}>
           {children}
         </main>
       </div>

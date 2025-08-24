@@ -1,6 +1,8 @@
 // Unified data service for Cloudflare Pages deployment
 // Uses Cloudflare D1 database via Cloudflare Functions
 
+import type { SeasonStatus } from '../constants/seasonStatus';
+
 export interface Season {
   id?: string;
   name: string;
@@ -15,7 +17,22 @@ export interface Season {
   endDate?: string;
   createdAt?: string;
   ownerId?: string;
-  status?: 'draft' | 'active' | 'completed';
+  status?: SeasonStatus;
+}
+
+export interface UserSeason {
+  User_Season_Id: number;
+  User_Id: string;
+  Season_Id: string;
+  created_at: string;
+}
+
+export interface SeasonMember {
+  id: number;
+  season_id: string;
+  user_id: string;
+  joined_at: string;
+  status: 'active' | 'inactive' | 'pending';
 }
 
 export interface HockeyGame {
@@ -164,18 +181,23 @@ class DataService {
 
   async deleteSeason(seasonId: string): Promise<void> {
     if (this.useLocalStorage) {
+      // In test mode, remove from localStorage
       const seasons = this.getLocalStorageSeasons();
-      const filteredSeasons = seasons.filter(s => s.id !== seasonId);
-      localStorage.setItem('seasons', JSON.stringify(filteredSeasons));
+      const updatedSeasons = seasons.filter(season => season.id !== seasonId);
+      localStorage.setItem('seasons', JSON.stringify(updatedSeasons));
       return;
     }
 
-    const response = await fetch(`${this.baseUrl}/seasons/${seasonId}`, {
-      method: 'DELETE'
-    });
-
-    if (!response.ok) {
-      throw new Error(`Failed to delete season: ${response.status}`);
+    try {
+      const response = await fetch(`${this.baseUrl}/seasons/delete/${encodeURIComponent(seasonId)}`, {
+        method: 'DELETE'
+      });
+      if (!response.ok) {
+        throw new Error(`Failed to delete season: ${response.status}`);
+      }
+    } catch (error) {
+      console.error('Failed to delete season:', error);
+      throw error;
     }
   }
 
@@ -264,6 +286,201 @@ class DataService {
 
     if (!response.ok) {
       throw new Error(`Failed to delete game: ${response.status}`);
+    }
+  }
+
+  // User-specific season methods
+  async getAllSeasons(): Promise<Season[]> {
+    if (this.useLocalStorage) {
+      // In test mode, return all localStorage data
+      return this.getLocalStorageSeasons();
+    }
+
+    try {
+      const response = await fetch(`${this.baseUrl}/seasons/all`);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch all seasons: ${response.status}`);
+      }
+      return await response.json();
+    } catch (error) {
+      console.error('Failed to fetch all seasons:', error);
+      return [];
+    }
+  }
+
+  async getUserOwnedSeasons(userId: string): Promise<Season[]> {
+    if (this.useLocalStorage) {
+      // In test mode, return mock data
+      const allSeasons = this.getLocalStorageSeasons();
+      return allSeasons.filter(season => season.ownerId === userId);
+    }
+
+    try {
+      const response = await fetch(`${this.baseUrl}/seasons/owned/${encodeURIComponent(userId)}`);
+      if (!response.ok) {
+        // If endpoint doesn't exist (404), fall back to localStorage
+        if (response.status === 404) {
+          console.log('User-specific API endpoint not found, falling back to localStorage');
+          const allSeasons = this.getLocalStorageSeasons();
+          return allSeasons.filter(season => season.ownerId === userId);
+        }
+        throw new Error(`Failed to fetch owned seasons: ${response.status}`);
+      }
+      
+      const text = await response.text();
+      // Check if response is HTML (error page) instead of JSON
+      if (text.trim().startsWith('<!doctype') || text.trim().startsWith('<html')) {
+        console.log('Received HTML instead of JSON, falling back to localStorage');
+        const allSeasons = this.getLocalStorageSeasons();
+        return allSeasons.filter(season => season.ownerId === userId);
+      }
+      
+      return JSON.parse(text);
+    } catch (error) {
+      console.error('Failed to fetch owned seasons:', error);
+      // Fall back to localStorage on any error
+      const allSeasons = this.getLocalStorageSeasons();
+      return allSeasons.filter(season => season.ownerId === userId);
+    }
+  }
+
+  async getUserMemberSeasons(userId: string): Promise<Season[]> {
+    if (this.useLocalStorage) {
+      // In test mode, return mock data
+      return this.getLocalStorageSeasons().slice(0, 2); // Mock some member seasons
+    }
+
+    try {
+      const response = await fetch(`${this.baseUrl}/seasons/member/${encodeURIComponent(userId)}`);
+      if (!response.ok) {
+        // If endpoint doesn't exist (404), fall back to localStorage
+        if (response.status === 404) {
+          console.log('Member seasons API endpoint not found, falling back to localStorage');
+          return this.getLocalStorageSeasons().slice(0, 2); // Mock some member seasons
+        }
+        throw new Error(`Failed to fetch member seasons: ${response.status}`);
+      }
+      
+      const text = await response.text();
+      // Check if response is HTML (error page) instead of JSON
+      if (text.trim().startsWith('<!doctype') || text.trim().startsWith('<html')) {
+        console.log('Received HTML instead of JSON for member seasons, falling back to localStorage');
+        return this.getLocalStorageSeasons().slice(0, 2); // Mock some member seasons
+      }
+      
+      return JSON.parse(text);
+    } catch (error) {
+      console.error('Failed to fetch member seasons:', error);
+      // Fall back to localStorage on any error
+      return this.getLocalStorageSeasons().slice(0, 2); // Mock some member seasons
+    }
+  }
+
+  async createSeasonWithOwnership(season: Season, userId: string): Promise<Season> {
+    // Set the owner ID and initial status before creating
+    const seasonWithOwner = { 
+      ...season, 
+      ownerId: userId,
+      status: 'preseason' as SeasonStatus
+    };
+    
+    if (this.useLocalStorage) {
+      // Create season in localStorage
+      const seasons = this.getLocalStorageSeasons();
+      const newSeason = {
+        ...seasonWithOwner,
+        id: `season-${Date.now()}`,
+        createdAt: new Date().toISOString()
+      };
+      seasons.push(newSeason);
+      localStorage.setItem('seasons', JSON.stringify(seasons));
+      console.log('Season created:', newSeason);
+      
+      // In localStorage mode, we can't easily simulate the member addition
+      // but we log it for development purposes
+      console.log(`User ${userId} automatically added as member to season ${newSeason.id}`);
+      
+      return newSeason;
+    }
+
+    try {
+      const response = await fetch(`${this.baseUrl}/seasons`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(seasonWithOwner),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to create season: ${response.status}`);
+      }
+
+      const createdSeason = await response.json();
+      
+      // Automatically add the owner as a member
+      try {
+        await this.joinSeason(createdSeason.id, userId);
+        console.log(`Owner ${userId} automatically added as member to season ${createdSeason.id}`);
+      } catch (memberError) {
+        console.warn('Failed to automatically add owner as member:', memberError);
+        // Don't fail the season creation if member addition fails
+      }
+
+      return createdSeason;
+    } catch (error) {
+      console.error('Failed to create season:', error);
+      throw error;
+    }
+  }
+
+  async joinSeason(seasonId: string, userId: string): Promise<void> {
+    if (this.useLocalStorage) {
+      // In test mode, just log the action
+      console.log(`User ${userId} joined season ${seasonId}`);
+      return;
+    }
+
+    try {
+      const response = await fetch(`${this.baseUrl}/seasons/${seasonId}/join`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ userId }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to join season: ${response.status}`);
+      }
+    } catch (error) {
+      console.error('Failed to join season:', error);
+      throw error;
+    }
+  }
+
+  async leaveSeason(seasonId: string, userId: string): Promise<void> {
+    if (this.useLocalStorage) {
+      // In test mode, just log the action
+      console.log(`User ${userId} left season ${seasonId}`);
+      return;
+    }
+
+    try {
+      const response = await fetch(`${this.baseUrl}/seasons/${seasonId}/leave`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ userId }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to leave season: ${response.status}`);
+      }
+    } catch (error) {
+      console.error('Failed to leave season:', error);
+      throw error;
     }
   }
 

@@ -46,8 +46,28 @@ A React TypeScript application for tracking private user sports seasons, specifi
 Initialize the D1 database with migrations:
 
 ```bash
-# Apply migrations to local D1 database
-npx wrangler d1 migrations apply sports_seasons --local
+# Apply all migrations to local D1 database
+npm run migrate:local
+
+# Or run individual migrations
+npx wrangler d1 execute sports_seasons --local --file=migrations/0001_create_seasons.sql
+npx wrangler d1 execute sports_seasons --local --file=migrations/0002_create_games.sql
+npx wrangler d1 execute sports_seasons --local --file=migrations/0003-add-user-seasons.sql
+npx wrangler d1 execute sports_seasons --local --file=migrations/0004-add-season-members.sql
+
+# For production deployment
+npm run migrate:remote
+
+# Alternative: Use migration scripts
+# Windows: scripts/migrate.bat
+# Unix/Mac: scripts/migrate.sh
+```
+
+**Database Schema:**
+- `seasons` - Hockey seasons and basic configuration
+- `games` - Individual game records and scheduling
+- `User_Seasons` - Season ownership/management (who controls each season)
+- `Season_Members` - Season participation (who plays in each season)
 ```
 
 ### Development

@@ -35,15 +35,15 @@ export function AuthButton() {
       <div className="relative" ref={dropdownRef}>
         <button
           onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-          className="flex items-center space-x-2 px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-md transition-colors"
+          className="flex items-center space-x-2 px-3 py-2 text-sm text-white hover:bg-gray-700 rounded-md transition-colors border border-gray-600 shadow-sm"
         >
           <span className="font-medium hidden sm:block">
-            {user.name || user.email}
+            {user.nickname || user.name || user.email}
           </span>
           {user.picture ? (
             <img
               src={user.picture}
-              alt={user.name || 'User'}
+              alt={user.nickname || user.name || 'User'}
               className="w-8 h-8 rounded-full border-2 border-white shadow-sm"
             />
           ) : (
@@ -51,11 +51,11 @@ export function AuthButton() {
               <User className="w-5 h-5 text-white" />
             </div>
           )}
-          <ChevronDown className="w-4 h-4 text-gray-500" />
+          <ChevronDown className="w-4 h-4 text-gray-300" />
         </button>
 
         {isDropdownOpen && (
-          <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg border border-gray-200 py-1 z-50">
+          <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-xl border border-gray-200 py-1 z-50 ring-1 ring-black ring-opacity-5">
             <button
               onClick={() => {
                 setIsDropdownOpen(false)
@@ -79,7 +79,7 @@ export function AuthButton() {
   return (
     <button
       onClick={() => loginWithRedirect()}
-      className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+      className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors shadow-sm border border-blue-500 font-medium"
     >
       <LogIn className="w-4 h-4" />
       <span>Login</span>
