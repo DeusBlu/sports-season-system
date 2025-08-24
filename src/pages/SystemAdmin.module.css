@@ -231,3 +231,40 @@
   from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
 }
+
+/* Status Colors - Global utility classes for status badges */
+:global(.bg-yellow-100) {
+  background-color: #fef3c7 !important;
+  color: #92400e !important;
+  border-color: #f59e0b !important;
+}
+
+:global(.bg-green-100) {
+  background-color: #d1fae5 !important;
+  color: #065f46 !important;
+  border-color: #10b981 !important;
+}
+
+:global(.bg-blue-100) {
+  background-color: #dbeafe !important;
+  color: #1e40af !important;
+  border-color: #3b82f6 !important;
+}
+
+:global(.bg-red-100) {
+  background-color: #fee2e2 !important;
+  color: #991b1b !important;
+  border-color: #ef4444 !important;
+}
+
+:global(.bg-purple-100) {
+  background-color: #ede9fe !important;
+  color: #7c2d12 !important;
+  border-color: #8b5cf6 !important;
+}
+
+:global(.bg-gray-100) {
+  background-color: #f3f4f6 !important;
+  color: #374151 !important;
+  border-color: #6b7280 !important;
+}

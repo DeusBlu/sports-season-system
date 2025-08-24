@@ -193,10 +193,38 @@ class DataService {
         method: 'DELETE'
       });
       if (!response.ok) {
-        throw new Error(`Failed to delete season: ${response.status}`);
+        const errorText = await response.text();
+        throw new Error(`Failed to delete season: ${response.status} - ${errorText}`);
       }
     } catch (error) {
       console.error('Failed to delete season:', error);
+      throw error;
+    }
+  }
+
+  async adminDeleteSeason(seasonId: string, accessToken: string): Promise<void> {
+    if (this.useLocalStorage) {
+      // In test mode, remove from localStorage (same as regular delete)
+      const seasons = this.getLocalStorageSeasons();
+      const updatedSeasons = seasons.filter(season => season.id !== seasonId);
+      localStorage.setItem('seasons', JSON.stringify(updatedSeasons));
+      return;
+    }
+
+    try {
+      const response = await fetch(`${this.baseUrl}/seasons/admin-delete/${encodeURIComponent(seasonId)}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Failed to admin delete season: ${response.status} - ${errorText}`);
+      }
+    } catch (error) {
+      console.error('Failed to admin delete season:', error);
       throw error;
     }
   }
@@ -368,7 +396,8 @@ class DataService {
         return this.getLocalStorageSeasons().slice(0, 2); // Mock some member seasons
       }
       
-      return JSON.parse(text);
+      const seasons = JSON.parse(text);
+      return seasons;
     } catch (error) {
       console.error('Failed to fetch member seasons:', error);
       // Fall back to localStorage on any error

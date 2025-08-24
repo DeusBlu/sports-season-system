@@ -26,13 +26,24 @@ export const onRequest: PagesFunction<Env> = async (context) => {
   }
 
   try {
-    // Check if the season exists
+    // Check if the season exists and get its status
     const season = await env.DB.prepare(`
-      SELECT id FROM seasons WHERE id = ?
+      SELECT id, status FROM seasons WHERE id = ?
     `).bind(seasonId).first();
 
     if (!season) {
       return new Response('Season not found', { status: 404 });
+    }
+
+    // Only allow deletion if season is in preseason status
+    if (season.status !== 'preseason') {
+      return new Response('Season can only be deleted in preseason status', { 
+        status: 400,
+        headers: {
+          'Content-Type': 'application/json',
+          ...corsHeaders
+        }
+      });
     }
 
     // Delete all season members first (foreign key constraint)

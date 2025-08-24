@@ -4,6 +4,7 @@ import './App.css'
 import './styles/pages.css'
 import { dataService } from './services/dataService'
 import Layout from './components/Layout'
+import AuthSync from './components/AuthSync'
 import Hockey from './pages/Hockey'
 import Schedule from './pages/Schedule'
 import ManageSeasons from './pages/ManageSeasons'
@@ -29,6 +30,7 @@ function App() {
 
   return (
     <Router>
+      <AuthSync />
       <Layout>
         {/* Connection Status Banner */}
         {connectionStatus !== 'connected' && (
@@ -43,6 +45,7 @@ function App() {
           <Route path="/" element={<Navigate to="/hockey" replace />} />
           <Route path="/hockey" element={<Hockey />} />
           <Route path="/hockey/schedule" element={<Schedule />} />
+          <Route path="/hockey/seasons/:seasonId" element={<Schedule />} />
           <Route path="/hockey/manage-seasons" element={<ManageSeasons />} />
           <Route path="/admin" element={<SystemAdmin />} />
         </Routes>

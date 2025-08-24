@@ -1,45 +1,32 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
 import { Trash2, Crown, Users, Calendar, Shield } from 'lucide-react';
-import { dataService, type Season } from '../services/dataService';
 import { getSeasonStatusLabel, getSeasonStatusColor } from '../constants/seasonStatus';
 import { usePermissions, PERMISSIONS } from '../hooks/usePermissions';
+import { useAppDispatch, useAppSelector } from '../store/hooks';
+import { loadAllSeasons, adminDeleteSeason, selectAllSeasons, selectSeasonsLoading } from '../store/slices/seasonsSlice';
 import styles from './SystemAdmin.module.css';
 
 export default function SystemAdmin() {
-  const { isAuthenticated } = useAuth0();
+  const { isAuthenticated, getAccessTokenSilently } = useAuth0();
   const { hasPermission, isLoading: permissionsLoading } = usePermissions();
-  const [allSeasons, setAllSeasons] = useState<Season[]>([]);
-  const [loading, setLoading] = useState(true);
+  const dispatch = useAppDispatch();
+  
+  // Redux state
+  const allSeasons = useAppSelector(selectAllSeasons);
+  const loading = useAppSelector(selectSeasonsLoading);
+  
   const [deleteLoading, setDeleteLoading] = useState<string | null>(null);
 
   // Check if user has permission to view this page
   const canViewAllSeasons = hasPermission(PERMISSIONS.VIEW_ALL_SEASONS);
   const canDeleteSeasons = hasPermission(PERMISSIONS.DELETE_SEASONS);
 
-  const loadAllSeasons = useCallback(async () => {
-    if (!isAuthenticated || !canViewAllSeasons) {
-      setLoading(false);
-      return;
-    }
-
-    try {
-      setLoading(true);
-      // This will need a new API endpoint to get ALL seasons regardless of owner
-      const seasons = await dataService.getAllSeasons();
-      setAllSeasons(seasons);
-    } catch (error) {
-      console.error('Failed to load all seasons:', error);
-    } finally {
-      setLoading(false);
-    }
-  }, [isAuthenticated, canViewAllSeasons]);
-
   useEffect(() => {
-    if (!permissionsLoading) {
-      loadAllSeasons();
+    if (!permissionsLoading && isAuthenticated && canViewAllSeasons) {
+      dispatch(loadAllSeasons());
     }
-  }, [loadAllSeasons, permissionsLoading]);
+  }, [dispatch, isAuthenticated, canViewAllSeasons, permissionsLoading]);
 
   const handleDeleteSeason = async (seasonId: string) => {
     if (!canDeleteSeasons || !confirm('Are you sure you want to delete this season? This action cannot be undone.')) {
@@ -48,8 +35,9 @@ export default function SystemAdmin() {
 
     try {
       setDeleteLoading(seasonId);
-      await dataService.deleteSeason(seasonId);
-      setAllSeasons(prev => prev.filter(season => season.id !== seasonId));
+      const accessToken = await getAccessTokenSilently();
+      // Use Redux to delete season
+      await dispatch(adminDeleteSeason({ seasonId, accessToken }));
     } catch (error) {
       console.error('Failed to delete season:', error);
       alert('Failed to delete season. Please try again.');

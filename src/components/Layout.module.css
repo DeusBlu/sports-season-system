@@ -112,13 +112,11 @@
   border-left-color: #ff4400;
 }
 
-.adminLink {
-  border-left-color: #10b981 !important;
-  background: rgba(16, 185, 129, 0.1) !important;
-}
-
-.adminLink:hover {
-  background: rgba(16, 185, 129, 0.2) !important;
+.separator {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.2);
+  margin: 1rem 0;
+  border-radius: 1px;
 }
 
 .mainContent {

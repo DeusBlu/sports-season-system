@@ -1,16 +1,22 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useAuth0 } from '@auth0/auth0-react'
-import { dataService, Season } from '../services/dataService'
+import { useLocation } from 'react-router-dom'
+import { dataService } from '../services/dataService'
+import type { Season } from '../services/dataService'
 import { User, Crown, Users, Calendar } from 'lucide-react'
 import { getSeasonStatusLabel, getSeasonStatusColor } from '../constants/seasonStatus'
 import { UserPermissionsDebug } from '../components/UserPermissionsDebug'
 
 export default function Seasons() {
   const { user, isAuthenticated } = useAuth0()
+  const location = useLocation()
   const [ownedSeasons, setOwnedSeasons] = useState<Season[]>([])
   const [memberSeasons, setMemberSeasons] = useState<Season[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+
+  // Determine sport from URL path
+  const sport = location.pathname.includes('/hockey/') ? 'Hockey' : 'Hockey' // Default to Hockey for now
 
   const loadUserSeasons = useCallback(async () => {
     if (!user?.sub) return
@@ -24,15 +30,23 @@ export default function Seasons() {
         dataService.getUserMemberSeasons(user.sub)
       ])
       
-      setOwnedSeasons(owned)
-      setMemberSeasons(member)
+      // Filter seasons by sport
+      const filteredOwned = owned.filter(season => 
+        !season.sportsType || season.sportsType === sport || season.game?.toLowerCase().includes('hockey')
+      )
+      const filteredMember = member.filter(season => 
+        !season.sportsType || season.sportsType === sport || season.game?.toLowerCase().includes('hockey')
+      )
+      
+      setOwnedSeasons(filteredOwned)
+      setMemberSeasons(filteredMember)
     } catch (err) {
       console.error('Failed to load user seasons:', err)
       setError('Failed to load seasons. Please try again.')
     } finally {
       setLoading(false)
     }
-  }, [user?.sub])
+  }, [user?.sub, sport])
 
   useEffect(() => {
     if (isAuthenticated && user?.sub) {
@@ -140,9 +154,9 @@ export default function Seasons() {
     <div className="page-container">
       <div className="content-area">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">My Seasons</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">My {sport} Seasons</h1>
           <p className="text-gray-600">
-            Seasons you own and participate in
+            {sport} seasons you own and participate in
           </p>
         </div>
 

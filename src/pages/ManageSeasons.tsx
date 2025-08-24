@@ -1,9 +1,9 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState } from 'react';
 import { useAuth0 } from '@auth0/auth0-react';
 import './ManageSeasons.css';
-import { dataService } from '../services/dataService';
-import type { Season } from '../services/dataService';
-import { SEASON_STATUS } from '../constants/seasonStatus';
+import { useAppDispatch, useAppSelector } from '../store/hooks';
+import { createSeason, deleteSeason, selectOwnedSeasons, selectSeasonsLoading, selectSeasonsError } from '../store/slices/seasonsSlice';
+import { SEASON_STATUS, getSeasonStatusLabel, getSeasonStatusColor } from '../constants/seasonStatus';
 
 interface SeasonSettings {
   seasonName: string;
@@ -17,9 +17,15 @@ interface SeasonSettings {
 
 const ManageSeasons: React.FC = () => {
   const { user, isAuthenticated } = useAuth0();
+  const dispatch = useAppDispatch();
+  
+  // Redux state
+  const seasons = useAppSelector(selectOwnedSeasons);
+  const loading = useAppSelector(selectSeasonsLoading);
+  const error = useAppSelector(selectSeasonsError);
+  
   const [showCreateModal, setShowCreateModal] = useState(false);
-  const [seasons, setSeasons] = useState<Season[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [deleting, setDeleting] = useState<string | null>(null);
   const [settings, setSettings] = useState<SeasonSettings>({
     seasonName: '',
     game: '',
@@ -29,30 +35,6 @@ const ManageSeasons: React.FC = () => {
     canReschedule: true,
     daySpanPerGame: 3
   });
-
-  const loadSeasons = useCallback(async () => {
-    if (!user?.sub) return;
-
-    try {
-      setLoading(true);
-      const seasonData = await dataService.getUserOwnedSeasons(user.sub);
-      setSeasons(seasonData);
-      console.log('Loaded seasons:', seasonData);
-    } catch (error) {
-      console.error('Failed to load seasons:', error);
-    } finally {
-      setLoading(false);
-    }
-  }, [user?.sub]);
-
-  // Load user's owned seasons on component mount
-  useEffect(() => {
-    if (isAuthenticated && user?.sub) {
-      loadSeasons();
-    } else {
-      setLoading(false);
-    }
-  }, [isAuthenticated, user?.sub, loadSeasons]);
 
   // Comprehensive hockey games list - newest first
   const hockeyGames = [
@@ -174,11 +156,9 @@ const ManageSeasons: React.FC = () => {
       };
 
       console.log('Creating season with settings:', seasonData);
-      const createdSeason = await dataService.createSeasonWithOwnership(seasonData, user.sub);
-      console.log('Season created:', createdSeason);
       
-      // Refresh the seasons list
-      loadSeasons();
+      // Use Redux to create season
+      await dispatch(createSeason({ seasonData, userId: user.sub }));
       
       setShowCreateModal(false);
       // Reset form
@@ -194,6 +174,24 @@ const ManageSeasons: React.FC = () => {
     } catch (error) {
       console.error('Failed to create season:', error);
       // TODO: Show error message to user
+    }
+  };
+
+  const handleDeleteSeason = async (seasonId: string) => {
+    if (!seasonId) return;
+    
+    const confirmDelete = window.confirm('Are you sure you want to delete this season? This action cannot be undone.');
+    if (!confirmDelete) return;
+
+    try {
+      setDeleting(seasonId);
+      // Use Redux to delete season
+      await dispatch(deleteSeason(seasonId));
+    } catch (error) {
+      console.error('Failed to delete season:', error);
+      alert('Failed to delete season. Only preseason seasons can be deleted.');
+    } finally {
+      setDeleting(null);
     }
   };
 
@@ -233,7 +231,27 @@ const ManageSeasons: React.FC = () => {
             <div className="seasons-grid">
               {seasons.map(season => (
                 <div key={season.id} className="season-card">
-                  <h4>{season.name}</h4>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', marginBottom: '0.5rem' }}>
+                    <h4 style={{ margin: 0 }}>{season.name}</h4>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      {season.status && (
+                        <span className={`status-badge ${getSeasonStatusColor(season.status)}`}>
+                          {getSeasonStatusLabel(season.status)}
+                        </span>
+                      )}
+                      {season.status === 'preseason' && (
+                        <button
+                          className="delete-btn"
+                          onClick={() => handleDeleteSeason(season.id!)}
+                          disabled={deleting === season.id}
+                          title="Delete Season"
+                        >
+                          {deleting === season.id ? '...' : '🗑️'}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                  <p><strong>Status:</strong> {season.status ? getSeasonStatusLabel(season.status) : 'Not Set'}</p>
                   <p><strong>Game:</strong> {season.game}</p>
                   <p><strong>Players:</strong> {season.numberOfPlayers}</p>
                   <p><strong>Games:</strong> {season.numberOfGames}</p>
