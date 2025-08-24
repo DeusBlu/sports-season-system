@@ -1,0 +1,208 @@
+/* Hockey Calendar Styles */
+.hockey-calendar {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  border: 2px solid rgba(30, 144, 255, 0.3);
+  border-top: 4px solid #ff6600;
+}
+
+.calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #1e90ff;
+}
+
+.calendar-header h3 {
+  color: #000080;
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.legend {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+  color: #2c5282;
+}
+
+.legend-color {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  border: 2px solid;
+}
+
+.legend-color.my-games {
+  background: #ff6600;
+  border-color: #ff6600;
+}
+
+.legend-color.other-games {
+  background: #1e90ff;
+  border-color: #1e90ff;
+}
+
+/* Custom Event Styling */
+.custom-event {
+  padding: 2px 4px;
+  height: 100%;
+  overflow: hidden;
+}
+
+.event-title {
+  font-weight: 600;
+  font-size: 11px;
+  line-height: 1.2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.home-away-indicator {
+  font-size: 10px;
+  margin-left: 4px;
+}
+
+.home-away-indicator.home {
+  filter: drop-shadow(0 0 2px rgba(255, 215, 0, 0.8));
+}
+
+.home-away-indicator.away {
+  filter: drop-shadow(0 0 2px rgba(135, 206, 235, 0.8));
+}
+
+/* Override React Big Calendar styles to match ice theme */
+.rbc-calendar {
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 2px solid #e6f3ff;
+}
+
+.rbc-header {
+  background: linear-gradient(135deg, #000080 0%, #1e90ff 100%);
+  color: white;
+  font-weight: 700;
+  padding: 12px 8px;
+  border: none;
+  text-transform: uppercase;
+  font-size: 12px;
+}
+
+.rbc-month-view {
+  border: 2px solid #e6f3ff;
+  border-radius: 8px;
+}
+
+.rbc-day-bg {
+  background: #f8fdff;
+  border-color: #e6f3ff;
+}
+
+.rbc-day-bg:hover {
+  background: #e6f3ff;
+}
+
+.rbc-today {
+  background: rgba(255, 102, 0, 0.1) !important;
+  border: 2px solid #ff6600;
+}
+
+.rbc-off-range-bg {
+  background: #f0f8ff;
+}
+
+.rbc-date-cell {
+  color: #000080;
+  font-weight: 600;
+  padding: 8px;
+}
+
+.rbc-date-cell a {
+  color: #000080;
+  font-weight: 700;
+}
+
+.rbc-date-cell.rbc-off-range {
+  color: #94a3b8;
+}
+
+/* Toolbar styling */
+.rbc-toolbar {
+  background: rgba(0, 0, 128, 0.05);
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  border: 2px solid #e6f3ff;
+}
+
+.rbc-toolbar button {
+  background: #1e90ff;
+  color: white;
+  border: 2px solid #1e90ff;
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.rbc-toolbar button:hover {
+  background: #ff6600;
+  border-color: #ff6600;
+  color: black;
+}
+
+.rbc-toolbar button.rbc-active {
+  background: #ff6600;
+  border-color: #ff6600;
+  color: black;
+}
+
+.rbc-toolbar-label {
+  color: #000080;
+  font-weight: 700;
+  font-size: 1.2rem;
+}
+
+/* Event popup styling */
+.rbc-popup {
+  background: white;
+  border: 3px solid #1e90ff;
+  border-radius: 8px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+.rbc-popup .rbc-header {
+  background: #000080;
+  color: white;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .calendar-header {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+  
+  .legend {
+    gap: 1rem;
+  }
+  
+  .hockey-calendar {
+    padding: 1rem;
+  }
+}

@@ -1,0 +1,21 @@
+name = "sports-season-system"
+compatibility_date = "2023-05-18"
+
+# For local development
+pages_build_output_dir = "dist"
+
+# D1 Database
+[[d1_databases]]
+binding = "DB"
+database_name = "sports_seasons"
+database_id = "your-database-id"
+
+[dev]
+host = "localhost"
+port = 8788
+
+[env.production.vars]
+NODE_ENV = "production"
+
+[env.development.vars]
+NODE_ENV = "development"
