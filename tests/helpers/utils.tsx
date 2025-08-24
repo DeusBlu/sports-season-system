@@ -1,7 +1,7 @@
 import React from 'react'
 import { render, type RenderOptions } from '@testing-library/react'
 import { BrowserRouter } from 'react-router-dom'
-import type { Season, HockeyGame } from '../services/dataService'
+import type { Season, HockeyGame } from '../../src/services/dataService'
 
 // Custom render function that includes Router wrapper
 const AllTheProviders = ({ children }: { children: React.ReactNode }) => {

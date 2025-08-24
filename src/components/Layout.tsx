@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { AuthButton } from './AuthButton';
 import './Layout.css';
 
 interface LayoutProps {
@@ -16,14 +17,19 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         <div className="nav-brand">
           <h1>Sports Season System</h1>
         </div>
-        <nav className="top-nav-links">
-          <Link 
-            to="/hockey" 
-            className={location.pathname.startsWith('/hockey') ? 'active' : ''}
-          >
-            Hockey
-          </Link>
-        </nav>
+        <div className="nav-center">
+          <nav className="top-nav-links">
+            <Link 
+              to="/hockey" 
+              className={location.pathname.startsWith('/hockey') ? 'active' : ''}
+            >
+              Hockey
+            </Link>
+          </nav>
+        </div>
+        <div className="nav-auth">
+          <AuthButton />
+        </div>
       </header>
 
       <div className="layout-body">

@@ -4,9 +4,11 @@ import './App.css'
 import './styles/pages.css'
 import { dataService } from './services/dataService'
 import Layout from './components/Layout'
+import { AuthDebug } from './components/AuthDebug'
 import Hockey from './pages/Hockey'
 import Schedule from './pages/Schedule'
 import ManageSeasons from './pages/ManageSeasons'
+import AuthCallback from './pages/AuthCallback'
 
 function App() {
   const [connectionStatus, setConnectionStatus] = useState<'connecting' | 'connected' | 'error'>('connecting')
@@ -37,12 +39,14 @@ function App() {
         )}
 
         <Routes>
+          <Route path="/callback" element={<AuthCallback />} />
           <Route path="/" element={<Navigate to="/hockey" replace />} />
           <Route path="/hockey" element={<Hockey />} />
           <Route path="/hockey/schedule" element={<Schedule />} />
           <Route path="/hockey/manage-seasons" element={<ManageSeasons />} />
         </Routes>
       </Layout>
+      <AuthDebug />
     </Router>
   )
 }

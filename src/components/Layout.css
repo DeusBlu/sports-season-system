@@ -23,6 +23,17 @@
   margin: 0;
   font-size: 1.5rem;
   font-weight: 600;
+  flex-shrink: 0;
+}
+
+.nav-center {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+.nav-auth {
+  flex-shrink: 0;
 }
 
 .top-nav-links {

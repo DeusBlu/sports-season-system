@@ -8,18 +8,19 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [react()],
     define: {
-      'import.meta.env.VITE_MONGODB_URI': JSON.stringify(env.VITE_MONGODB_URI || env.MONGODB_URI),
+      'import.meta.env.VITE_AUTH0_DOMAIN': JSON.stringify(env.VITE_AUTH0_DOMAIN),
+      'import.meta.env.VITE_AUTH0_CLIENT_ID': JSON.stringify(env.VITE_AUTH0_CLIENT_ID),
     },
     test: {
       globals: true,
       environment: 'jsdom',
-      setupFiles: ['./src/test/setup.ts'],
+      setupFiles: ['./tests/helpers/setup.ts'],
       coverage: {
         provider: 'v8',
         reporter: ['text', 'json', 'html'],
         exclude: [
           'node_modules/',
-          'src/test/',
+          'tests/',
           '**/*.test.{ts,tsx}',
           '**/*.spec.{ts,tsx}',
           'src/main.tsx',
